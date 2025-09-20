@@ -1,0 +1,73 @@
+name: Build and Push Docker Images #Ye workflow ka naam ha. Sirf ek label ha jo GitHub UI par dikhata ha ke ye pipeline kis kaam ke liye ha.
+
+on: #Ye trigger define kar raha ha. Ye workflow ko kab run karna ha.
+  push: #Ye trigger ha jo push event ke liye ha.
+    branches: [ "main" ]  #Ye branch ha jo trigger hone ke liye ha.
+    tags: [ "v*.*.*" ]    #ya koi version tag banega jese v1.2.3.
+ # Ye is liye zaroori ha taake sirf important changes par hi Docker image build aur push ho.
+
+jobs: #Jobs ka matlab ha ek group of steps jo ek environment me run hotay hain.
+  build-and-push: #Ye job ka naam ha. Sirf ek label ha jo GitHub UI par dikhata ha ke ye pipeline kis kaam ke liye ha.
+    runs-on: ubuntu-latest #matlab GitHub ka jo server workflow run karega wo Ubuntu OS hoga. Ubuntu is liye use hota ha kyunki ye fast ha, Docker-friendly ha aur har action ka best support isi par milta ha. Windows/macOS bhi use kar saktay ho, lekin wo slow hote hain aur har library easily available nahi hoti.
+    permissions: #Ye permission set kar raha ha ke workflow ko repo ke andar code read karne ki access mile. Ye security ke liye ha, taake extra permissions na milein.
+      contents: read  # allow reading the repo
+
+    steps: #Har job ke andar multiple steps hotay hain. Ye steps sequentially run hotay hain.
+      - name: Checkout #Ye step ka naam ha. Sirf ek label ha jo GitHub UI par dikhata ha ke ye pipeline kis kaam ke liye ha.
+        uses: actions/checkout@v4 #Ye step repo ka code nikal kar GitHub runner (yani Ubuntu VM) ke andar download karta ha. Is ke bina runner ko tumhare repo ka code milega hi nahi.
+
+      - name: Set up Docker Buildx  
+        uses: docker/setup-buildx-action@v3 #Buildx Docker ka ek advanced builder ha jo multi-platform builds aur caching support karta ha. Agar normal Docker build use karo ge to slow hoga aur advanced features nahi milenge.
+
+      - name: Log in to Docker Hub  
+        uses: docker/login-action@v3 #Ye Docker Hub me login karta ha, taki runner jo images build kare usko Docker Hub par push kar sake.
+        with: #Ye step ke andar parameters define kar raha ha.
+          username: ${{ secrets.DOCKERHUB_USERNAME }} #Username aur Token secrets me rakhe gaye hain taake safe rahen aur public repo me expose na ho.
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for backend  # generates tags like :latest, :sha, and from git tags
+        id: meta_backend
+        uses: docker/metadata-action@v5 #eh ek ready-made GitHub Action hai jo Docker image ke liye tags aur labels automatically bana deta hai.
+                                       #Matlab hume manually :latest, :sha, :v1.2.3 likhne ki zarurat nahi, yeh action git branch/tag/commit ke hisaab se bana dega.
+        with:
+          images: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/todo-backend #Yeh final Docker image ka naam hai.
+                  # Docker Hub registry. todo-backend → repo/project ka naam.
+          tags: #Yahan batate hain ke kaunse tags generate karne hain. Ek image ke multiple tags ho sakte hain.
+            type=raw,value=latest,enable={{is_default_branch}} #latest tag generate hoga jis branch par hi push hoga.
+            type=ref,event=tag #Agar koi git tag banega (jaise v1.2.3), to ussi naam ka Docker tag banega.
+                              #Example: git tag v2.0.0 → image tag :v2.0.0.
+            type=sha #Har commit ka ek unique SHA hota hai (jaise 4f3a9c1). Yeh action usko bhi ek tag bana deta hai.
+                    #Iska fayda: exact commit ke hisaab se image identify kar sakte ho.
+
+      - name: Build and push backend  # builds backend Dockerfile and pushes with generated tags
+        uses: docker/build-push-action@v6 #ye ek ready-made GitHub Action hai jo Docker image build aur push karta hai.
+                                          #Matlab hume manual build aur push karne ki zarurat nahi, yeh action build aur push kar deta hai.
+        with:
+          context: ./backend #context define karta ha kahan se build kare (backend folder).
+          file: ./backend/Dockerfile #file batata ha kaunsa Dockerfile use karna ha.
+          push: true #push: true ka matlab image ko Hub par upload karo.
+          tags: ${{ steps.meta_backend.outputs.tags }} #tags aur labels upar wale metadata step se liye gaye hain.
+          labels: ${{ steps.meta_backend.outputs.labels }} #labels aur tags same hain, ek image ke multiple labels ho sakte hain.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max #cache-from aur cache-to caching ke liye ha taake builds fast ho jayein.
+
+      - name: Extract metadata (tags, labels) for frontend  #Ye same kaam karta ha jo backend me tha, lekin frontend ke liye. Alag image banega aur alag tag assign honge.
+        id: meta_frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/todo-frontend
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=ref,event=tag
+            type=sha
+
+      - name: Build and push frontend  # builds frontend Dockerfile and pushes with generated tags
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta_frontend.outputs.tags }}
+          labels: ${{ steps.meta_frontend.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

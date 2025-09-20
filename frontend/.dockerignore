@@ -1,0 +1,3 @@
+node_modules   # exclude host node_modules from build context (speed + correctness)
+npm-debug.log  # ignore npm logs
+dist           # exclude previous build output; image will use fresh build

@@ -1,0 +1,3 @@
+node_modules        # do not send host-installed modules to Docker build context
+npm-debug.log       # ignore npm log files
+.env                # never include environment secrets in the image build context
