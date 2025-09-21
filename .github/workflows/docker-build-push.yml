@@ -32,7 +32,7 @@ jobs: #Jobs ka matlab ha ek group of steps jo ek environment me run hotay hain.
         with:
           images: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/todo-backend #Yeh final Docker image ka naam hai.
                   # Docker Hub registry. todo-backend → repo/project ka naam.
-          tags: #Yahan batate hain ke kaunse tags generate karne hain. Ek image ke multiple tags ho sakte hain.
+          tags: | #Yahan batate hain ke kaunse tags generate karne hain. Ek image ke multiple tags ho sakte hain.
             type=raw,value=latest,enable={{is_default_branch}} #latest tag generate hoga jis branch par hi push hoga.
             type=ref,event=tag #Agar koi git tag banega (jaise v1.2.3), to ussi naam ka Docker tag banega.
                               #Example: git tag v2.0.0 → image tag :v2.0.0.
