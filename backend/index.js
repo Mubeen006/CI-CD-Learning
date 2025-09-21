@@ -77,7 +77,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   // console.log(`📱 Environment: ${process.env.NODE_ENV || 'development'}`);
   // console.log(`🌐 CORS Origin: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
-  // console.log(`📊 Health Check: http://localhost:${PORT}/health`);
+  console.log(`📊 Health Check: http://localhost:${PORT}/health`);
   // console.log(`📝 API Base URL: http://localhost:${PORT}/api/todos`);
 });
 
