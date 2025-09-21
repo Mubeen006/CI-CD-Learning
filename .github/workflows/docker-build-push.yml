@@ -30,12 +30,10 @@ jobs: #Jobs ka matlab ha ek group of steps jo ek environment me run hotay hain.
         uses: docker/metadata-action@v5 #eh ek ready-made GitHub Action hai jo Docker image ke liye tags aur labels automatically bana deta hai.#Matlab hume manually :latest, :sha, :v1.2.3 likhne ki zarurat nahi, yeh action git branch/tag/commit ke hisaab se bana dega.
         with:
           images: docker.io/${{ secrets.DOCKERHUB_USERNAME }}/todo-backend #Yeh final Docker image ka naam hai. Docker Hub registry. todo-backend → repo/project ka naam.
-          tags: | #Yahan batate hain ke kaunse tags generate karne hain. Ek image ke multiple tags ho sakte hain.
-            type=raw,value=latest,enable={{is_default_branch}} #latest tag generate hoga jis branch par hi push hoga.
-            type=ref,event=tag #Agar koi git tag banega (jaise v1.2.3), to ussi naam ka Docker tag banega. Example: git tag v2.0.0 → image tag :v2.0.0.
-            type=sha #Har commit ka ek unique SHA hota hai (jaise 4f3a9c1). Yeh action usko bhi ek tag bana deta hai.
-                    #Iska fayda: exact commit ke hisaab se image identify kar sakte ho.
-
+          tags: | #Yahan batate hain ke kaunse tags generate karne hain. Ek image ke multiple tags ho sakte hain.#latest tag generate hoga jis branch par hi push hoga.#Agar koi git tag banega (jaise v1.2.3), to ussi naam ka Docker tag banega. Example: git tag v2.0.0 → image tag :v2.0.0.#Har commit ka ek unique SHA hota hai (jaise 4f3a9c1). Yeh action usko bhi ek tag bana deta hai.#Iska fayda: exact commit ke hisaab se image identify kar sakte ho.
+            type=raw,value=latest,enable={{is_default_branch}} 
+            type=ref,event=tag 
+            type=sha 
       - name: Build and push backend  # builds backend Dockerfile and pushes with generated tags
         uses: docker/build-push-action@v6 #ye ek ready-made GitHub Action hai jo Docker image build aur push karta hai. Matlab hume manual build aur push karne ki zarurat nahi, yeh action build aur push kar deta hai.
         with:
