@@ -1,0 +1,22 @@
+{
+  "name": "todo-app",
+  "version": "1.0.0",
+  "description": "Full-stack Todo application with React and Node.js",
+  "scripts": {
+    "dev": "node start-dev.js",
+    "health": "node health-check.js",
+    "test:backend": "node test-backend.js",
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "build:backend": "cd backend && npm install --production",
+    "build:frontend": "cd frontend && npm run build"
+  },
+  "keywords": ["todo", "react", "nodejs", "mongodb", "express"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

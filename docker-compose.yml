@@ -1,120 +1,169 @@
-# Docker Compose file - har line pe wazeh Urdu comments (purpose/use/importance/benefits)
+# # Docker Compose file - har line pe wazeh Urdu comments (purpose/use/importance/benefits)
 
-version: "3.9"   # Compose file format version.
-                 # Use: Compose features aur syntax define karta hai.
-                 # Importance: 3.9 modern features aur compatibility deti hai.
-                 # Benefit: Stable behaviour across Docker Compose releases.
+# version: "3.9"   # Compose file format version.
+#                  # Use: Compose features aur syntax define karta hai.
+#                  # Importance: 3.9 modern features aur compatibility deti hai.
+#                  # Benefit: Stable behaviour across Docker Compose releases.
 
-services:        # Yahan hum apni application ki services (containers) define karte hain.
-                 # Use: Multiple containers ek saath chalane aur unke relations set karne ke liye.
-                 # Importance: Poore app (backend+frontend+db) ko ek command se chalana asaan hota hai.
+# services:        # Yahan hum apni application ki services (containers) define karte hain.
+#                  # Use: Multiple containers ek saath chalane aur unke relations set karne ke liye.
+#                  # Importance: Poore app (backend+frontend+db) ko ek command se chalana asaan hota hai.
 
-  mongo:         # Service name = "mongo" (internal network pe isi naam se reachable hoga)
+#   mongo:         # Service name = "mongo" (internal network pe isi naam se reachable hoga)
+#     image: mongo:7
+#     # Use: Official MongoDB image version 7 use kar rahe hain.
+#     # Importance: Seedha vendor/official image use karne se compatibility aur security updates milte hain.
+#     # Benefit: Tumhe khud DB binaries banane ki zaroorat nahi; stable, tested image milti hai.
+
+#     container_name: todo_mongo
+#     # Use: Container ko friendly naam diya (host pe dikhai dega).
+#     # Importance: Logs ya docker commands me identify karna asaan hota hai.
+#     # Benefit: Debugging simple ho jati hai (docker logs todo_mongo).
+
+#     restart: unless-stopped
+#     # Use: Restart policy - agar container crash kare to automatically restart kare.
+#     # Meaning: System reboot ya container crash par dobara chalu ho jayega; jab tak manually stop na karo.
+#     # Benefit: High availability - DB zyada time down nahi rahegi.
+
+#     ports:
+#       - "27017:27017"  
+#       # Use: Host port 27017 ko container port 27017 se map karta hai (host:container).
+#       # Importance: Agar tum local machine ya tools se direct connect karna chaho (mongo compass, scripts) to accessible ho.
+#       # Security note: Production me generally DB ko public port pe expose nahi karte — sirf internal network pe rakho.
+#       # Benefit: Development me easy access; production me firewall / private network prefer karo.
+
+#     volumes:
+#       - mongo_data:/data/db  
+#       # Use: Named volume "mongo_data" ko container ke /data/db folder se connect karta hai.
+#       # Importance: Data persistence — agar container delete ho bhi jaye, DB data save rahega.
+#       # Benefit: Safe backups, container lifecycle se alag storage; easy migration & restore.
+
+#   backend:       # Backend service (tumhara Node.js/Express app)
+#     build: ./backend # Backend ka Dockerfile se custom image build
+#     # Use: Iska matlab Dockerfile ./backend folder se build hoga (custom app image banegi).
+#     # Importance: Backend ke liye hum custom image banate hain kyunki code aur deps ko image me bundle karna zaroori hai.
+#     # Benefit: Same environment har jagah (dev/staging/prod) - "works on my machine" problem solve hoti hai.
+
+#     container_name: todo_backend
+#     # Use: Container ka friendly naam.
+#     # Benefit: docker logs todo_backend, docker exec -it todo_backend shell etc. simple ho jata hai.
+
+#     depends_on:
+#       - mongo  
+#     # Use: Docker Compose ko batata hai ke "mongo" service pehle start ho.
+#     # Important note: depends_on sirf start *order* dictate karta hai; ye guarantee nahi karta ke mongo poori tarah ready (accept connections) ho.
+#     # Recommendation: Agar backend ko DB ready chahiye to healthchecks ya wait-for-it script use karo (readiness ensure karne ke liye).
+#     # Benefit: Basic startup order control milta hai.
+
+#     environment:
+#       - PORT=5000 
+#       - NODE_ENV=development
+#       - MONGODB_URI=mongodb://mongo:27017/todos 
+#       - CORS_ORIGIN=http://localhost:5173
+#     # Use: Environment variables container ke andar set karte hain.
+#     # Explain each:
+#     #  - PORT=5000  -> Backend ke server ka default port (app isko process.env.PORT se read karega).
+#     #  - NODE_ENV=development -> Mode: development ya production. Isse logging, caching, error handling differ hoti hai.
+#     #  - MONGODB_URI=mongodb://mongo:27017/todos -> Mongo connection string.
+#     #       Key point: host name 'mongo' Compose network me Mongo service ka hostname hai (internal DNS).
+#     #  - CORS_ORIGIN=http://localhost:5173 -> Frontend se requests allowed karne ke liye origin set kar rahe.
+#     # Importance: Env vars se same image ko different configs me run kar sakte ho (no code change).
+#     # Benefit: Flexible configuration, secure secrets handling (production me GitHub Secrets ya Docker secrets use karo).
+
+#     ports:
+#       - "5000:5000"  
+#     # Use: Host port 5000 ko container port 5000 se map karta hai.
+#     # Importance: Tum browser/postman me http://localhost:5000 se backend access kar saktay ho.
+#     # Note: Agar server public pe deploy kar rahe ho to firewall/NGINX proxy lagana behtar hai.
+
+#     restart: unless-stopped
+#     # Use: Same restart policy as mongo.
+#     # Benefit: Agar backend crash kare to restart ho jaye — availability improve hoti hai.
+
+#     # Optional (suggestion for dev):
+#     # volumes:
+#     #   - ./backend:/app
+#     # Use: Local code ko container me mount karne se code changes turant reflect hotay hain (dev mode).
+#     # Importance: Development ke liye bohot useful; production me image build karke use karo.
+
+#   frontend:      # Frontend service (React/Vite or built static site)
+#     build: ./frontend
+#     # Use: Dockerfile in ./frontend se frontend image banayega.
+#     # Importance: Agar tum React/Vite/Next static build kar rahe ho to image me build include ho sakti hai.
+#     # Benefit: Frontend ko bhi ek consistent container me host karna easy ho jata hai.
+
+#     container_name: todo_frontend
+#     # Use: Friendly name for ease of management.
+
+#     depends_on:
+#       - backend  
+#     # Use: Backend pehle start ho to frontend ko backend service milne me asani hogi.
+#     # Note: again, depends_on sirf start order control karta hai; backend ka readiness alag baat hai.
+
+#     ports:
+#       - "5173:80"  
+#     # Use: Host port 5173 ko container port 80 se map karta hai (host:container).
+#     # Important explanation & suggestion:
+#     #  - Agar tumhara frontend container andar port 80 pe serve kar raha hai (e.g., nginx serving build), ye mapping theek hai.
+#     #  - Lekin agar tum Vite dev server use kar rahe ho jo default 5173 pe chalta hai, to mapping "5173:5173" chahiye.
+#     #  - Check karo ke frontend Dockerfile kis port pe app ko listen kar raha hai; mapping usi se match karo.
+#     # Benefit: Correct port mapping se browser me http://localhost:5173 se app load hogi.
+
+#     restart: unless-stopped
+#     # Use: Frontend bhi automatically restart ho jayega agar crash ho.
+#     # Benefit: Dev/Prod dono me resilience.
+
+# volumes:
+#   mongo_data:   # Named volume for MongoDB data persistence
+#     # Use: Yahan named volume define kar rahe hain; Compose isko host par manage karega.
+#     # Importance: Volume container lifecycle se alag hota hai (container delete hone pe bhi data safe rahega).
+#     # Benefit: Backups, restores, data persistence across container upgrades.
+
+
+version: "3.9"
+
+services:
+  mongo:
     image: mongo:7
-    # Use: Official MongoDB image version 7 use kar rahe hain.
-    # Importance: Seedha vendor/official image use karne se compatibility aur security updates milte hain.
-    # Benefit: Tumhe khud DB binaries banane ki zaroorat nahi; stable, tested image milti hai.
-
     container_name: todo_mongo
-    # Use: Container ko friendly naam diya (host pe dikhai dega).
-    # Importance: Logs ya docker commands me identify karna asaan hota hai.
-    # Benefit: Debugging simple ho jati hai (docker logs todo_mongo).
-
     restart: unless-stopped
-    # Use: Restart policy - agar container crash kare to automatically restart kare.
-    # Meaning: System reboot ya container crash par dobara chalu ho jayega; jab tak manually stop na karo.
-    # Benefit: High availability - DB zyada time down nahi rahegi.
-
     ports:
-      - "27017:27017"  
-      # Use: Host port 27017 ko container port 27017 se map karta hai (host:container).
-      # Importance: Agar tum local machine ya tools se direct connect karna chaho (mongo compass, scripts) to accessible ho.
-      # Security note: Production me generally DB ko public port pe expose nahi karte — sirf internal network pe rakho.
-      # Benefit: Development me easy access; production me firewall / private network prefer karo.
-
+      - "27017:27017"
     volumes:
-      - mongo_data:/data/db  
-      # Use: Named volume "mongo_data" ko container ke /data/db folder se connect karta hai.
-      # Importance: Data persistence — agar container delete ho bhi jaye, DB data save rahega.
-      # Benefit: Safe backups, container lifecycle se alag storage; easy migration & restore.
-
-  backend:       # Backend service (tumhara Node.js/Express app)
-    build: ./backend # Backend ka Dockerfile se custom image build
-    # Use: Iska matlab Dockerfile ./backend folder se build hoga (custom app image banegi).
-    # Importance: Backend ke liye hum custom image banate hain kyunki code aur deps ko image me bundle karna zaroori hai.
-    # Benefit: Same environment har jagah (dev/staging/prod) - "works on my machine" problem solve hoti hai.
-
-    container_name: todo_backend
-    # Use: Container ka friendly naam.
-    # Benefit: docker logs todo_backend, docker exec -it todo_backend shell etc. simple ho jata hai.
-
-    depends_on:
-      - mongo  
-    # Use: Docker Compose ko batata hai ke "mongo" service pehle start ho.
-    # Important note: depends_on sirf start *order* dictate karta hai; ye guarantee nahi karta ke mongo poori tarah ready (accept connections) ho.
-    # Recommendation: Agar backend ko DB ready chahiye to healthchecks ya wait-for-it script use karo (readiness ensure karne ke liye).
-    # Benefit: Basic startup order control milta hai.
-
+      - mongo_data:/data/db
     environment:
-      - PORT=5000 
+      - MONGO_INITDB_DATABASE=Todo
+
+  backend:
+    build: ./backend
+    container_name: todo_backend
+    environment:
+      - PORT=5000
       - NODE_ENV=development
-      - MONGODB_URI=mongodb://mongo:27017/todos 
+      - MONGODB_URI=mongodb://mongo:27017/Todo
       - CORS_ORIGIN=http://localhost:5173
-    # Use: Environment variables container ke andar set karte hain.
-    # Explain each:
-    #  - PORT=5000  -> Backend ke server ka default port (app isko process.env.PORT se read karega).
-    #  - NODE_ENV=development -> Mode: development ya production. Isse logging, caching, error handling differ hoti hai.
-    #  - MONGODB_URI=mongodb://mongo:27017/todos -> Mongo connection string.
-    #       Key point: host name 'mongo' Compose network me Mongo service ka hostname hai (internal DNS).
-    #  - CORS_ORIGIN=http://localhost:5173 -> Frontend se requests allowed karne ke liye origin set kar rahe.
-    # Importance: Env vars se same image ko different configs me run kar sakte ho (no code change).
-    # Benefit: Flexible configuration, secure secrets handling (production me GitHub Secrets ya Docker secrets use karo).
-
     ports:
-      - "5000:5000"  
-    # Use: Host port 5000 ko container port 5000 se map karta hai.
-    # Importance: Tum browser/postman me http://localhost:5000 se backend access kar saktay ho.
-    # Note: Agar server public pe deploy kar rahe ho to firewall/NGINX proxy lagana behtar hai.
-
-    restart: unless-stopped
-    # Use: Same restart policy as mongo.
-    # Benefit: Agar backend crash kare to restart ho jaye — availability improve hoti hai.
-
-    # Optional (suggestion for dev):
-    # volumes:
-    #   - ./backend:/app
-    # Use: Local code ko container me mount karne se code changes turant reflect hotay hain (dev mode).
-    # Importance: Development ke liye bohot useful; production me image build karke use karo.
-
-  frontend:      # Frontend service (React/Vite or built static site)
-    build: ./frontend
-    # Use: Dockerfile in ./frontend se frontend image banayega.
-    # Importance: Agar tum React/Vite/Next static build kar rahe ho to image me build include ho sakti hai.
-    # Benefit: Frontend ko bhi ek consistent container me host karna easy ho jata hai.
-
-    container_name: todo_frontend
-    # Use: Friendly name for ease of management.
-
+      - "5000:5000"
     depends_on:
-      - backend  
-    # Use: Backend pehle start ho to frontend ko backend service milne me asani hogi.
-    # Note: again, depends_on sirf start order control karta hai; backend ka readiness alag baat hai.
-
-    ports:
-      - "5173:80"  
-    # Use: Host port 5173 ko container port 80 se map karta hai (host:container).
-    # Important explanation & suggestion:
-    #  - Agar tumhara frontend container andar port 80 pe serve kar raha hai (e.g., nginx serving build), ye mapping theek hai.
-    #  - Lekin agar tum Vite dev server use kar rahe ho jo default 5173 pe chalta hai, to mapping "5173:5173" chahiye.
-    #  - Check karo ke frontend Dockerfile kis port pe app ko listen kar raha hai; mapping usi se match karo.
-    # Benefit: Correct port mapping se browser me http://localhost:5173 se app load hogi.
-
+      - mongo
     restart: unless-stopped
-    # Use: Frontend bhi automatically restart ho jayega agar crash ho.
-    # Benefit: Dev/Prod dono me resilience.
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./frontend
+    container_name: todo_frontend
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
-  mongo_data:   # Named volume for MongoDB data persistence
-    # Use: Yahan named volume define kar rahe hain; Compose isko host par manage karega.
-    # Importance: Volume container lifecycle se alag hota hai (container delete hone pe bhi data safe rahega).
-    # Benefit: Backups, restores, data persistence across container upgrades.
+  mongo_data:

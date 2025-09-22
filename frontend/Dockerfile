@@ -87,70 +87,41 @@ RUN npm run build
 # RUNTIME STAGE - PRODUCTION WEB SERVER
 # =============================================================================
 
-# ✅ STEP 7: Runtime Stage - Nginx Web Server
-# FROM nginx:alpine AS runtime
+# ✅ STEP 7: Development Stage - Vite Dev Server
+# FROM node:20-alpine AS runtime
 #
-# WHY NGINX?
-# - Excellent for serving static files (HTML, CSS, JS, images)
-# - High performance and low memory usage
-# - Built-in compression, caching, and security features
-# - Industry standard for production web servers
-#
-# WHY nginx:alpine?
-# - Alpine Linux: Very lightweight (~15MB)
-# - Security-focused: Minimal attack surface
-# - Fast startup time
-# - Perfect for containerized applications
-FROM nginx:alpine AS runtime
+# WHY DEVELOPMENT MODE?
+# - For development, we want hot reload and fast refresh
+# - Vite dev server provides instant updates when code changes
+# - Better development experience with source maps and debugging
+FROM node:20-alpine AS runtime
 
-# ✅ STEP 8: Copy Built Files to Nginx
-# COPY --from=build /app/dist /usr/share/nginx/html
-#
-# WHAT DOES --from=build DO?
-# - Copies files from the "build" stage (not from host)
-# - Multi-stage build magic: uses output from previous stage
-# - Only the built static files are copied, not source code or node_modules
-#
-# WHY /usr/share/nginx/html?
-# - Nginx's default directory for serving static files
-# - Any files placed here are served at the root URL (/)
-# - Standard convention for Nginx static file serving
-COPY --from=build /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-# ✅ STEP 9: SPA Routing Configuration (Optional)
-# For single-page apps (SPA) you may add a custom nginx config with try_files
-# to ensure client-side routing works (e.g., React Router). See guide for example.
-#
-# WHY IS THIS NEEDED?
-# - React Router handles routing on client-side
-# - When user visits /about, server needs to serve index.html
-# - Without this, direct URL access to /about would return 404
-# - try_files directive: try /about, then fallback to /index.html
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm ci
 
-# ✅ STEP 10: Port Configuration
-# EXPOSE 80
-#
-# WHAT DOES EXPOSE 80 DO?
-# - Documents that container listens on port 80 (HTTP default)
-# - Does NOT actually publish the port (use -p 80:80 for that)
-# - Helps developers understand the application
-# - Used by docker-compose and orchestration tools
-EXPOSE 80
+# Copy source code
+COPY . .
 
-# ✅ STEP 11: Start Nginx Server
-# CMD ["nginx", "-g", "daemon off;"]
+# ✅ STEP 8: Port Configuration
+# EXPOSE 5173
+#
+# WHAT DOES EXPOSE 5173 DO?
+# - Vite dev server default port
+# - Documents that container listens on port 5173
+# - Matches the development setup
+EXPOSE 5173
+
+# ✅ STEP 9: Start Vite Dev Server
+# CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 #
 # WHAT DOES THIS COMMAND DO?
-# - nginx: Start the Nginx web server
-# - -g "daemon off;": Run Nginx in foreground mode
-# - Required for Docker containers (containers need foreground process)
-# - Without this, Nginx would start in background and container would exit
-#
-# WHY FOREGROUND MODE?
-# - Docker containers need a foreground process to stay running
-# - If main process exits, container stops
-# - Nginx normally runs as daemon (background), but we force foreground
-CMD ["nginx", "-g", "daemon off;"]
+# - npm run dev: Start Vite development server
+# - --host 0.0.0.0: Allow connections from outside container
+# - Required for Docker containers to accept external connections
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 # =============================================================================
 # MULTI-STAGE BUILD BENEFITS:

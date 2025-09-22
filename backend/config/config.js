@@ -7,7 +7,7 @@ export const config = {
   // Database configuration
   database: {
     uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/Todo',
-    collectionName: 'todo', // This is the collection name you wanted
+    collectionName: 'todos', // Collection name for todos
     options: {
       useNewUrlParser: true,
       useUnifiedTopology: true,

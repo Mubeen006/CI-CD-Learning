@@ -141,11 +141,9 @@ export const useTodos = () => {
       if (isOnline) {
         // Try API first
         const response = await todoAPI.createTodo({ text: text.trim() });
-        console.log('Full API response:', response);
-        console.log('Response data:', response.data);
         
-        // The API service already returns the todo object directly
-        const newTodo = response;
+        // Extract the todo object from the response
+        const newTodo = response.data;
         
         // Convert MongoDB _id to id for consistency
         if (newTodo._id && !newTodo.id) {

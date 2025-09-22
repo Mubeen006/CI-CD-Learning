@@ -19,6 +19,23 @@ A modern, responsive Todo application built with React, Express.js, and MongoDB.
 - Node.js (v16 or higher)
 - MongoDB (local or cloud instance)
 - npm or yarn
+- Docker and Docker Compose (optional)
+
+### Option 1: Docker Compose (Recommended)
+
+1. **Clone and start all services**
+   ```bash
+   git clone <repository-url>
+   cd DockerTest_Todo
+   docker-compose up --build
+   ```
+
+2. **Access the application**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:5000
+   - MongoDB: localhost:27017
+
+### Option 2: Local Development
 
 ### Installation
 
@@ -44,10 +61,13 @@ A modern, responsive Todo application built with React, Express.js, and MongoDB.
    
    Create a `.env` file in the backend directory:
    ```env
-   MONGODB_URI=mongodb://localhost:27017/todoapp
+   # MONGODB_URI=mongodb://localhost:27017/Todo  # Uncomment for custom URI
    PORT=5000
    CORS_ORIGIN=http://localhost:5173
+   NODE_ENV=development
    ```
+   
+   **Note**: If no `MONGODB_URI` is specified, the app defaults to `mongodb://localhost:27017/Todo`
 
 5. **Start MongoDB**
    
@@ -191,10 +211,36 @@ npm run preview
 
 ### Backend (.env)
 ```env
-MONGODB_URI=mongodb://localhost:27017/todoapp
+# MONGODB_URI=mongodb://localhost:27017/Todo  # Optional - defaults to this if not set
 PORT=5000
 CORS_ORIGIN=http://localhost:5173
 NODE_ENV=development
+```
+
+## 🐳 Docker Commands
+
+### Development
+```bash
+# Start all services
+docker-compose up
+
+# Start with rebuild
+docker-compose up --build
+
+# Start in background
+docker-compose up -d
+
+# Stop all services
+docker-compose down
+
+# View logs
+docker-compose logs -f backend
+```
+
+### Testing Backend
+```bash
+# Test the API endpoints
+node test-backend.js
 ```
 
 ## 📱 Browser Support
